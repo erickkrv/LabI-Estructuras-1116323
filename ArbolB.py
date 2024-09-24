@@ -429,10 +429,27 @@ def importar_libros(arbol):
                     ultima_linea = linea
 
                     if linea.startswith("INSERT;"):
-                        # operacion_actual = "INSERT"
+                        # Cargar datos del JSON
                         datos = json.loads(linea[7:].strip())
-                        libro = Libro(datos["isbn"], datos["name"], datos["author"], datos["category"], datos["price"],
-                                      datos["quantity"])
+
+                        # Verificación de campos obligatorios (isbn y name)
+                        if "isbn" not in datos or not datos["isbn"]:
+                            raise ValueError("Error: Falta el ISBN del libro.")
+                        if "name" not in datos or not datos["name"]:
+                            raise ValueError("Error: Falta el nombre del libro.")
+
+                        # Obtener valores del JSON, verificando si están presentes y no vacíos
+                        isbn = datos["isbn"]
+
+                        author = datos.get("author") if "author" in datos and datos["author"] else None
+                        category = datos.get("category") if "category" in datos and datos["category"] else None
+                        price = datos.get("price") if "price" in datos and datos["price"] else None
+                        quantity = datos.get("quantity") if "quantity" in datos else None
+
+                        # Crear libro solo si los campos obligatorios están presentes
+                        libro = Libro(isbn, datos["name"], author, category, price, quantity)
+
+                        # Insertar libro en el árbol
                         arbol.insert(libro)
 
                     elif linea.startswith("DELETE;"):
